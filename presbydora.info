@@ -1,0 +1,4 @@
+name = "Presbyterian Historical Society Customizations"
+description = "Customized islandora content, including blocks and custom settings."
+core = 7.x
+version = 7.x-dev

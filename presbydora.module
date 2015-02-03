@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * Customization module for Presbyterian Historical Society.
+ */
+
+/**
+* Implements hook_block_info().
+*/
+function presbydora_block_info() {
+  $blocks = array();
+  $blocks['presbydora_name'] = array(
+    'info' => t('PHS Site Name'),
+  );
+  $blocks['presbydora_donate'] = array(
+    'info' => t('PHS Site Donation Button'),
+  );
+  return $blocks;
+}
+
+/**
+* Implements hook_block_view().
+*/
+function presbydora_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'presbydora_name':
+      $block['subject'] = 'Presbyterian Historical Society site name';
+      $block['content'] = variable_get('site_name', "");
+      break;
+      
+    case 'presbydora_donate':
+      $block['subject'] = 'Presbyterian Historical Society Donate Button';
+      $block['content'] = theme_button(
+        array(
+          "title" => t("Donate"),
+          "value" => t("Donate"),
+        )
+      );
+      break;
+  }
+  return $block;
+}
