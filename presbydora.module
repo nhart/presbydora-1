@@ -42,3 +42,31 @@ function presbydora_block_view($delta = '') {
   }
   return $block;
 }
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function presbydora_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if (!empty($data['tabs'])) {
+    $object = menu_get_object('islandora_object', '2');
+    if ($object && isset($object['MODS']) && islandora_datastream_access(ISLANDORA_METADATA_EDIT, $object['MODS']))
+      $data['tabs'][0]['output'][] = array(
+        '#theme' => 'menu_local_task',
+        '#link' => array(
+          'title' => t('Edit MODS'),
+          'href' => "islandora/object/{$object->id}/datastream/MODS/edit",
+          'localized_options' => array(),
+          'weight' => 98,
+        ),
+      );
+
+    $data['tabs'][0]['count'] = $data['tabs'][0]['count'] + 1;
+
+    foreach ($data['tabs'][0]['output'] as &$tab) {
+      if ($tab['#link']['title'] === 'IP Embargo') {
+        $tab['#link']['weight'] = 99;
+      }
+      $tab['#weight'] = $tab['#link']['weight'];
+    }
+  }
+}
