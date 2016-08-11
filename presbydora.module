@@ -53,16 +53,19 @@ function presbydora_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       $data['tabs'][0]['output'][] = array(
         '#theme' => 'menu_local_task',
         '#link' => array(
-          'title' => t('Edit MODS'),
+          'title' => t('MODS'),
           'href' => "islandora/object/{$object->id}/datastream/MODS/edit",
           'localized_options' => array(),
-          'weight' => 99,
+          'weight' => 98,
         ),
       );
 
     $data['tabs'][0]['count'] = $data['tabs'][0]['count'] + 1;
 
     foreach ($data['tabs'][0]['output'] as &$tab) {
+      if ($tab['#link']['title'] === 'IP Embargo') {
+        $tab['#link']['weight'] = 99;
+      }
       $tab['#weight'] = $tab['#link']['weight'];
     }
   }
