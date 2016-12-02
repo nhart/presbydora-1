@@ -29,7 +29,7 @@ function presbydora_block_view($delta = '') {
       $block['subject'] = 'Presbyterian Historical Society site name';
       $block['content'] = variable_get('site_name', "");
       break;
-      
+
     case 'presbydora_donate':
       $block['subject'] = 'Presbyterian Historical Society Donate Button';
       $block['content'] = theme_button(
@@ -70,6 +70,43 @@ function presbydora_menu_local_tasks_alter(&$data, $router_item, $root_path) {
         $tab['#link']['weight'] = 99;
       }
       $tab['#weight'] = $tab['#link']['weight'];
+    }
+  }
+}
+
+/**
+ * Implements hook_process_islandora_solr_metadata_display().
+ */
+function presbydora_process_islandora_solr_metadata_display(array &$variables) {
+  presbydora_remove_solr_metadata_fields($variables, 'solr_fields');
+}
+
+/**
+ * Implements hook_process_islandora_solr_metadata_description().
+ */
+function presbydora_process_islandora_solr_metadata_description(array &$variables) {
+  presbydora_remove_solr_metadata_fields($variables, 'description');
+}
+
+/**
+ * Remove fields from Solr metadata based on datastrem access.
+ *
+ * @param array $variables
+ *   Theme variables.
+ * @param string $key
+ *   The key of the array to remove the fields form.
+ */
+function presbydora_remove_solr_metadata_fields(&$variables, $key) {
+  $object = $variables['islandora_object'];
+  $mapping = array(
+    'OCR_t' => 'OCR',
+    'text_nodes_HOCR_hlt' => 'HOCR',
+  );
+  foreach ($mapping as $field => $dsid) {
+    if (isset($variables[$key][$field])) {
+      if (isset($object[$dsid]) && !islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid])) {
+        unset($variables[$key][$field]);
+      }
     }
   }
 }
