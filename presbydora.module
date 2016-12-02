@@ -89,7 +89,7 @@ function presbydora_process_islandora_solr_metadata_description(array &$variable
 }
 
 /**
- * Remove fields from Solr metadata based on datastrem access.
+ * Remove fields from Solr metadata based on datastream access.
  *
  * @param array $variables
  *   Theme variables.
