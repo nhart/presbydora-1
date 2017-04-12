@@ -85,5 +85,12 @@ function presbyterian_collection_page_layout_strongarm() {
   );
   $export['islandora_collection_search_searchable_collections'] = $strongarm;
 
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'pm_existing_pages_disabled_islandora_object_existing_page';
+  $strongarm->value = FALSE;
+  $export['pm_existing_pages_disabled_islandora_object_existing_page'] = $strongarm;
+
   return $export;
 }

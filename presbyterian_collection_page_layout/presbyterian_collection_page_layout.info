@@ -27,6 +27,7 @@ features[variable][] = islandora_collection_search_gsearch_endpoint
 features[variable][] = islandora_collection_search_gsearch_user
 features[variable][] = islandora_collection_search_retain_search_values
 features[variable][] = islandora_collection_search_searchable_collections
+features[variable][] = pm_existing_pages_disabled_islandora_object_existing_page
 features[views_view][] = collection_banner
 features[views_view][] = list_style_field_view
 features_exclude[dependencies][ctools] = ctools
