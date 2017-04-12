@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Presbyterian Collection Page Layout feature.
+ */
+
+include_once 'presbyterian_collection_page_layout.features.inc';

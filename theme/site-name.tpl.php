@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @file site-name template
+ */
 ?>
 
 <div class="footer-site-name">
