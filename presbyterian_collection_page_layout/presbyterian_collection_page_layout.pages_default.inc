@@ -35,10 +35,8 @@ function presbyterian_collection_page_layout_default_page_manager_handlers() {
           'name' => 'php',
           'settings' => array(
             'description' => 'Is Collection Page',
-            'php' => '      $object = menu_get_object(\'islandora_object\', 2);
-      if ($object && in_array("islandora:collectionCModel", $object->models)) {
-        return TRUE;
-      }',
+            'php' => '$object = menu_get_object(\'islandora_object\', 2);
+return $object && in_array(\'islandora:collectionCModel\', $object->models);',
           ),
           'not' => FALSE,
         ),

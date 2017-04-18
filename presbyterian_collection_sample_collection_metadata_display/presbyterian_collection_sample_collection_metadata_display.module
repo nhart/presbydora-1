@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Presbyterian Collection sample collection metadata display feature.
+ */
+
+include_once 'presbyterian_collection_sample_collection_metadata_display.features.inc';

@@ -14,7 +14,7 @@ function presbyterian_collection_page_layout_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'islandora_collection_search_advanced_search_alter';
-  $strongarm->value = 0;
+  $strongarm->value = 1;
   $export['islandora_collection_search_advanced_search_alter'] = $strongarm;
 
   $strongarm = new stdClass();
@@ -37,20 +37,6 @@ function presbyterian_collection_page_layout_strongarm() {
   $strongarm->name = 'islandora_collection_search_display_label';
   $strongarm->value = 1;
   $export['islandora_collection_search_display_label'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'islandora_collection_search_gsearch_endpoint';
-  $strongarm->value = 'http://localhost:8080/fedoragsearch/rest';
-  $export['islandora_collection_search_gsearch_endpoint'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'islandora_collection_search_gsearch_user';
-  $strongarm->value = 'fedoraAdmin';
-  $export['islandora_collection_search_gsearch_user'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
