@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the PHS Metadata Configs feature.
+ */
+
+include_once 'phs_metadata_configs.features.inc';
