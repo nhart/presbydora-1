@@ -5,6 +5,15 @@
  */
 
 /**
+ * Implements hook_ctools_plugin_api().
+ */
+function phs_metadata_configs_ctools_plugin_api($module = NULL, $api = NULL) {
+  if ($module == "strongarm" && $api == "strongarm") {
+    return array("version" => "1");
+  }
+}
+
+/**
  * Implements hook_islandora_solr_metadata_configurations_default_fields().
  */
 function phs_metadata_configs_islandora_solr_metadata_configurations_default_fields() {
