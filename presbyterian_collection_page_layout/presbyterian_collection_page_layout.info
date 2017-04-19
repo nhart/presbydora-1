@@ -4,6 +4,7 @@ core = 7.x
 package = Features
 dependencies[] = fe_block
 dependencies[] = islandora_collection_search
+dependencies[] = panels
 dependencies[] = pm_existing_pages
 dependencies[] = presbydora
 dependencies[] = strongarm
