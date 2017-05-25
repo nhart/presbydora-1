@@ -180,7 +180,7 @@ function presbydora_embargo_date_set_year_range($form_element, $form_values) {
 function presbydora_islandora_datastream_access($op, $islandora_datastream, $user) {
   if ($islandora_datastream->id == 'OBJ' || $islandora_datastream->id == 'PDF') {
     $guest = user_role_load_by_name('PHS Guest');
-    if (user_is_anonymous() || (isset($guest->rid) && user_has_role($guest->rid, $user))) {
+    if ($user->uid == 0 || (isset($guest->rid) && user_has_role($guest->rid, $user))) {
       return FALSE;
     }
   }
