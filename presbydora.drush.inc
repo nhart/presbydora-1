@@ -83,6 +83,9 @@ function presbydora_collection_reorganize_batch_operation($pid, $collections, &$
   }
   $object = islandora_object_load($pid);
   if ($object) {
+    $rels = $object->relationships;
+    $rels->autoCommit = FALSE;
+    $commit = FALSE;
     foreach ($collections as $collection_pid) {
       if (!isset($context['sandbox']['good_collections'][$collection_pid])) {
         $collection = islandora_object_load($collection_pid);
@@ -95,13 +98,14 @@ function presbydora_collection_reorganize_batch_operation($pid, $collections, &$
         }
       }
       if (isset($context['sandbox']['good_collections'][$collection_pid])) {
-        $rels = $object->relationships;
-        $rels->autoCommit = FALSE;
+        $commit = TRUE;
         $rels->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
         $rels->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
-        $rels->commitRelationships();
         drush_print("Added $pid to $collection_pid");
       }
+    }
+    if ($commit == TRUE) {
+      $rels->commitRelationships();
     }
   }
   else {
