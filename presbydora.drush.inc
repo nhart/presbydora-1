@@ -62,10 +62,13 @@ function drush_presbydora_collection_reorganize_batch() {
       }
     }
 
-    $operations[] = array('presbydora_collection_reorganize_batch_operation', array(
-      $pid,
-      $collections,
-      ));
+    $operations[] = array(
+      'presbydora_collection_reorganize_batch_operation',
+      array(
+        $pid,
+        $collections,
+      ),
+    );
   }
   $batch = array(
     'operations' => $operations,
