@@ -11,7 +11,7 @@
 function presbydora_drush_command() {
   return array(
     'presbydora_collection_reorganize_batch' => array(
-      'description' => 'Reorignaizes objects based on csv',
+      'description' => 'Reorganizes objects based on csv',
       'drupal dependencies' => array(
         'islandora',
       ),
@@ -27,7 +27,7 @@ function presbydora_drush_command() {
 }
 
 /**
- * Lift expired embargoes.
+ * Command callback; process csv batch.
  */
 function drush_presbydora_collection_reorganize_batch() {
   module_load_include('inc', 'islandora', 'includes/utilities');
@@ -35,9 +35,8 @@ function drush_presbydora_collection_reorganize_batch() {
   $pids = array_map('str_getcsv', file($path));
   $operations = array();
 
-
   foreach ($pids as $i_row => $row) {
-    //skip column headers
+    // Skip column headers.
     if ($i_row == 0) {
       continue;
     }
@@ -45,7 +44,7 @@ function drush_presbydora_collection_reorganize_batch() {
     $collections = array();
     foreach ($row as $i_column => $column) {
       $column = trim($column);
-      //first column is the PID of the object to add to the collections
+      // First column is the PID of the object to add to the collections.
       if ($i_column == 0) {
         if (!islandora_is_valid_pid($column)) {
           drush_set_error("PID: $column is invalid");
@@ -53,7 +52,7 @@ function drush_presbydora_collection_reorganize_batch() {
         }
         $pid = $column;
       }
-      //3rd column onward is the collection PIDs to add the object to.
+      // 3rd column onward is the collection PIDs to add the object to.
       elseif ($i_column > 2 && !empty($column)) {
         if (!islandora_is_valid_pid($column)) {
           drush_set_error("PID: $column is invalid");
@@ -64,9 +63,9 @@ function drush_presbydora_collection_reorganize_batch() {
     }
 
     $operations[] = array('presbydora_collection_reorganize_batch_operation', array(
-        $pid,
-        $collections,
-    ));
+      $pid,
+      $collections,
+      ));
   }
   $batch = array(
     'operations' => $operations,
@@ -75,6 +74,9 @@ function drush_presbydora_collection_reorganize_batch() {
   drush_backend_batch_process();
 }
 
+/**
+ * Batch operation; Add isMemberOfCollection relations to PID.
+ */
 function presbydora_collection_reorganize_batch_operation($pid, $collections, &$context) {
   if (!isset($context['sandbox']['good_collections'])) {
     $context['sandbox']['good_collections'] = array();
@@ -93,8 +95,11 @@ function presbydora_collection_reorganize_batch_operation($pid, $collections, &$
         }
       }
       if (isset($context['sandbox']['good_collections'][$collection_pid])) {
-        $object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
-        $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
+        $rels = $object->relationships;
+        $rels->autoCommit = FALSE;
+        $rels->remove(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
+        $rels->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection_pid);
+        $rels->commitRelationships();
         drush_print("Added $pid to $collection_pid");
       }
     }
