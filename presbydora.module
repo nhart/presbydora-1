@@ -72,6 +72,49 @@ function presbydora_block_view($delta = '') {
 }
 
 /**
+ * Implements hook template_preprocess_page().
+ *
+ * Default mobile users to list view on object and search pages.
+ */
+function presbydora_preprocess_page(&$vars) {
+  if (module_exists('context')) {
+    // Check if we are on an Islandora Object page, or an Islandora Search Page.
+    $path_parts = explode("/", current_path());
+    if ($path_parts[0] == 'islandora' &&
+      ($path_parts[1] == 'object' ||
+      $path_parts[1] == 'search')) {
+
+      // Current supported contexts (mobile or tablet).
+      $mobile = 'mobile_device_detect_context';
+      $tablet = 'tablet_device_detect_context';
+
+      // Available contexts, configured in the Context UI Module.
+      $contexts = context_active_contexts();
+
+      // Only when the context tells us, default the user to 'List' view
+      // When dealing with mobile or tablet devices.
+      if (array_key_exists($mobile, $contexts) ||
+        array_key_exists($tablet, $contexts)) {
+
+        // Stop processing if we are already on list view.
+        // Default view is 'Grid'.
+        $query_params = drupal_get_query_parameters();
+        if (!isset($query_params['display'])) {
+          drupal_goto(
+            current_path(),
+            array(
+              'query' => array(
+                'display' => 'list',
+              ),
+            )
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
  * Process variables for vermontdora_metadata_description template.
  *
  * Default template: presbydora-metadata-description.tpl.php
