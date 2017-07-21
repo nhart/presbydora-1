@@ -85,19 +85,17 @@ function presbydora_preprocess_page(&$vars) {
       ($path_parts[1] == 'object' ||
       $path_parts[1] == 'search')) {
 
-      // Available contexts, configured in the Context UI Module.
-      $contexts = context_active_contexts();
-
       // Current supported contexts (mobile or tablet).
-      $mobile_detection = function() {
+      $mobile_detection = function () {
+
         // Available contexts, configured in the Context UI Module.
         // context_active_contexts() returns an array of stdClass objects, with
         // Array keys required for name comparison.
-       $contexts = array_keys(context_active_contexts());
+        $contexts = array_keys(context_active_contexts());
         return array_intersect(
           array(
             'mobile_device_detect_context',
-            'tablet_device_detect_context'
+            'tablet_device_detect_context',
           ),
           $contexts
         );
@@ -128,7 +126,7 @@ function presbydora_preprocess_page(&$vars) {
 /**
  * Process variables for vermontdora_metadata_description template.
  *
- * Default template: presbydora-metadata-description.tpl.php
+ * Default template: presbydora-metadata-description.tpl.php.
  *
  * @param array $variables
  *   An associative array containing:
