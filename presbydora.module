@@ -77,7 +77,7 @@ function presbydora_block_view($delta = '') {
  * Default mobile users to list view on object and search pages.
  */
 function presbydora_preprocess_page(&$vars) {
-  if (module_exists('context')) {
+  if (module_exists('phs_context_feature')) {
     // Check if we are on an Islandora Object page, or an Islandora Search Page.
     $path_parts = explode("/", current_path());
     if ($path_parts[0] == 'islandora' &&
