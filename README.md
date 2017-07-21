@@ -11,6 +11,21 @@ This module requires the following modules/libraries:
 * [Islandora](https://github.com/islandora/islandora)
 * [Tuque](https://github.com/islandora/tuque)
 
+## Optional Requirements
+
+When [Context](https://www.drupal.org/project/context), [Context Mobile Detect](https://www.drupal.org/project/context_mobile_detect) and [PHS Theme Fetaure](https://github.com/discoverygarden/phs_theme_feature)'s 'phs_context_feature'
+are present and enabled, grid view will become the default view for mobile
+users (phone and tablet) my means of the following library:
+
+* [Mobile Detect](https://github.com/serbanghita/Mobile-Detect)
+
+These modules and Libraries must be installed and enabled for this functionality
+to take affect.
+
+When installing the [Mobile Detect](https://github.com/serbanghita/Mobile-Detect) Library, be sure to rename
+the 'Mobile Detect' folder to 'Mobile_Detect' in the sites/all/libraries
+directory (sites/all/libraries/Mobile_Detect/Mobile_Detect.php).
+
 ## Installation
 
 Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.

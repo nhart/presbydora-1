@@ -78,33 +78,44 @@ function presbydora_block_view($delta = '') {
  */
 function presbydora_preprocess_page(&$vars) {
   if (module_exists('phs_context_feature')) {
+
     // Check if we are on an Islandora Object page, or an Islandora Search Page.
     $path_parts = explode("/", current_path());
     if ($path_parts[0] == 'islandora' &&
       ($path_parts[1] == 'object' ||
       $path_parts[1] == 'search')) {
 
-      // Current supported contexts (mobile or tablet).
-      $mobile = 'mobile_device_detect_context';
-      $tablet = 'tablet_device_detect_context';
-
       // Available contexts, configured in the Context UI Module.
       $contexts = context_active_contexts();
 
+      // Current supported contexts (mobile or tablet).
+      $mobile_detection = function() {
+        // Available contexts, configured in the Context UI Module.
+        // context_active_contexts() returns an array of stdClass objects, with
+        // Array keys required for name comparison.
+       $contexts = array_keys(context_active_contexts());
+        return array_intersect(
+          array(
+            'mobile_device_detect_context',
+            'tablet_device_detect_context'
+          ),
+          $contexts
+        );
+      };
+
       // Only when the context tells us, default the user to 'List' view
       // When dealing with mobile or tablet devices.
-      if (array_key_exists($mobile, $contexts) ||
-        array_key_exists($tablet, $contexts)) {
+      if ($mobile_detection()) {
 
-        // Stop processing if we are already on list view.
-        // Default view is 'Grid'.
+        // Stop processing if we are already on grid view.
+        // Default view is 'List'.
         $query_params = drupal_get_query_parameters();
         if (!isset($query_params['display'])) {
           drupal_goto(
             current_path(),
             array(
               'query' => array(
-                'display' => 'list',
+                'display' => 'grid',
               ),
             )
           );
