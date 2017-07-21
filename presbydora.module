@@ -72,9 +72,61 @@ function presbydora_block_view($delta = '') {
 }
 
 /**
+ * Implements hook template_preprocess_page().
+ *
+ * Default mobile users to list view on object and search pages.
+ */
+function presbydora_preprocess_page(&$vars) {
+  if (module_exists('phs_context_feature')) {
+
+    // Check if we are on an Islandora Object page, or an Islandora Search Page.
+    $path_parts = explode("/", current_path());
+    if ($path_parts[0] == 'islandora' &&
+      ($path_parts[1] == 'object' ||
+      $path_parts[1] == 'search')) {
+
+      // Current supported contexts (mobile or tablet).
+      $mobile_detection = function () {
+
+        // Available contexts, configured in the Context UI Module.
+        // context_active_contexts() returns an array of stdClass objects, with
+        // Array keys required for name comparison.
+        $contexts = array_keys(context_active_contexts());
+        return array_intersect(
+          array(
+            'mobile_device_detect_context',
+            'tablet_device_detect_context',
+          ),
+          $contexts
+        );
+      };
+
+      // Only when the context tells us, default the user to 'List' view
+      // When dealing with mobile or tablet devices.
+      if ($mobile_detection()) {
+
+        // Stop processing if we are already on grid view.
+        // Default view is 'List'.
+        $query_params = drupal_get_query_parameters();
+        if (!isset($query_params['display'])) {
+          drupal_goto(
+            current_path(),
+            array(
+              'query' => array(
+                'display' => 'grid',
+              ),
+            )
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
  * Process variables for vermontdora_metadata_description template.
  *
- * Default template: presbydora-metadata-description.tpl.php
+ * Default template: presbydora-metadata-description.tpl.php.
  *
  * @param array $variables
  *   An associative array containing:
