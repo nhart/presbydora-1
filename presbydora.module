@@ -109,12 +109,11 @@ function presbydora_preprocess_page(&$vars) {
         // Default view is 'List'.
         $query_params = drupal_get_query_parameters();
         if (!isset($query_params['display'])) {
+          $query_params['display'] = 'grid';
           drupal_goto(
             current_path(),
             array(
-              'query' => array(
-                'display' => 'grid',
-              ),
+              'query' => $query_params,
             )
           );
         }
