@@ -217,6 +217,13 @@ function presbydora_form_islandora_scholar_embargo_form_alter(&$form, &$form_sta
 }
 
 /**
+ * Implements hook_form_islandora_ip_embargo_object_embargo_form_alter().
+ */
+function presbydora_form_islandora_ip_embargo_object_embargo_form_alter(&$form, &$form_state, $form_id) {
+  $form['expiry_date']['#after_build'] = array('presbydora_embargo_date_set_year_range');
+}
+
+/**
  * Override original year range.
  */
 function presbydora_embargo_date_set_year_range($form_element, $form_values) {
