@@ -6,13 +6,13 @@
  */
 
 /**
- * Produce HTML representing TEXT content.
+ * Return the contents of the TEXT datastream.
  *
  * @param AbstractObject $object
  *   A Fedora object containing a TEXT datastream.
  *
  * @return string
- *   The transformed HTML, as a string.
+ *   The filtered output of TEXT datastream contents.
  */
 function presbydora_display_text(AbstractObject $object) {
   $datastream = islandora_datastream_load('TEXT', $object);
