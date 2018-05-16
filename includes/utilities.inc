@@ -15,14 +15,7 @@
  *   The filtered output of TEXT datastream contents.
  */
 function presbydora_display_text(AbstractObject $object) {
-  $datastream = islandora_datastream_load('TEXT', $object);
-
-  if ($datastream) {
-    return check_markup($datastream->content, 'filtered_html');
-  }
-  else {
-    return t('Error loading TEXT datastream.');
-  }
+  return check_markup($object['TEXT']->content, 'filtered_html');
 }
 
 /**
