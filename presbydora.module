@@ -292,8 +292,9 @@ function presbydora_islandora_datastream_access($op, $islandora_datastream, $use
 
     $ancestors = get_ancestors($pid);
     $bypass_pids = variable_get('presbydora_access_bypass_pids');
+    $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
 
-    if (!empty($bypass_pids) && in_array($ancestors, $bypass_pids)) {
+    if (!empty($bypass_pids) && $is_intersect) {
       return TRUE;
     }
 
@@ -325,9 +326,6 @@ function get_ancestors($pid) {
   $ancestors = array();
   if ($results['numFound'] > 0) {
     $ancestors = $results['objects'][0]['solr_doc']['ancestors_ms'];
-
-    // Pop islandora root PID.
-    $ancestors = array_shift($ancestors);
   }
   return $ancestors;
 }
