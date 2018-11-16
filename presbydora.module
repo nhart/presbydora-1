@@ -9,17 +9,29 @@
   * Implements hook_menu().
   */
 function presbydora_menu() {
-  return array(
-    'islandora/object/%islandora_object/view_text' => array(
-      'title' => 'Transcript',
-      'type' => MENU_LOCAL_TASK,
-      'page callback' => 'presbydora_text_view',
-      'page arguments' => array(2),
-      'access callback' => 'presbydora_access_text_view',
-      'access arguments' => array(2),
-      'file' => 'includes/utilities.inc',
-    ),
+  $items = array();
+
+  $items['admin/islandora/presbydora'] = array(
+    'title' => 'Presbydora Admin',
+    'description' => 'Configuration to specify objects that can bypass datastream access check.',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('presbydora_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
   );
+
+  $items['islandora/object/%islandora_object/view_text'] = array(
+    'title' => 'Transcript',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'presbydora_text_view',
+    'page arguments' => array(2),
+    'access callback' => 'presbydora_access_text_view',
+    'access arguments' => array(2),
+    'file' => 'includes/utilities.inc',
+  );
+
+  return $items;
 }
 
 /**
@@ -272,10 +284,50 @@ function presbydora_embargo_date_set_year_range($form_element, $form_values) {
  * Implements hook_islandora_object_access().
  */
 function presbydora_islandora_datastream_access($op, $islandora_datastream, $user) {
+  // Modified to allow specific objects to be accessible.
   if ($islandora_datastream->id == 'OBJ' || $islandora_datastream->id == 'PDF') {
+    $bypass_pids = array();
+    $object = $islandora_datastream->parent;
+    $pid = $object->id;
+
+    $ancestors = get_ancestors($pid);
+    $bypass_pids = variable_get('presbydora_access_bypass_pids');
+
+    if (!empty($bypass_pids) && in_array($ancestors, $bypass_pids)) {
+      return TRUE;
+    }
+
     $guest = user_role_load_by_name('PHS Guest');
     if ($user->uid == 0 || (isset($guest->rid) && user_has_role($guest->rid, $user))) {
       return FALSE;
     }
   }
+}
+
+/**
+ * Function that will return an array of ancestors related to the pid param.
+ *
+ * @param string $pid
+ *   Object pid to find ancestors of.
+ *
+ * @return array
+ *   Array containing ancestors' PIDs.
+ */
+function get_ancestors($pid) {
+  $qp = new IslandoraSolrQueryProcessor();
+  $query = format_string('PID:"!pid"',
+    array('!pid' => $pid)
+  );
+  $qp->buildQuery($query);
+  $qp->executeQuery(FALSE);
+  $results = $qp->islandoraSolrResult['response'];
+
+  $ancestors = array();
+  if ($results['numFound'] > 0) {
+    $ancestors = $results['objects'][0]['solr_doc']['ancestors_ms'];
+
+    // Pop islandora root PID.
+    $ancestors = array_shift($ancestors);
+  }
+  return $ancestors;
 }
