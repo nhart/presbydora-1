@@ -24,3 +24,54 @@ function presbydora_text_view(AbstractObject $object) {
     ),
   );
 }
+
+/**
+ * Function that will return an array of ancestors related to the pid param.
+ *
+ * @param string $pid
+ *   Object pid to find ancestors of.
+ *
+ * @return array
+ *   Array containing ancestors' PIDs.
+ */
+function presbydora_get_ancestors($pid) {
+  $qp = new IslandoraSolrQueryProcessor();
+  $query = format_string('PID:"!pid"',
+    array('!pid' => $pid)
+  );
+  $qp->buildQuery($query);
+  $qp->solrParams['fq'] = '';
+  $qp->executeQuery(FALSE);
+  try {
+    $results = $qp->islandoraSolrResult['response']['objects'];
+    $total_results = $qp->islandoraSolrResult['response']['numFound'];
+  }
+  catch (Exception $e) {
+    watchdog_exception('Presbydora', $e, 'Got an exception while searching for object ancestors and constituencies.', array(), WATCHDOG_ERROR);
+    $results = array();
+  }
+
+  $ancestors = array();
+  $constituencies = array();
+  if ($total_results > 0) {
+    try {
+      if (!empty($results[0]['solr_doc']['ancestors_ms'])) {
+        $ancestors = $results[0]['solr_doc']['ancestors_ms'];
+      }
+      // Extract constituencies and merge into one array.
+      if (!empty($results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'])) {
+        $constituencies = $results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'];
+        for ($i = 0; $i < count($constituencies); $i++) {
+          // Remove info:fedora/.
+          $constituencies[$i] = substr($constituencies[$i], 12);
+          $cons_parents = presbydora_get_ancestors($constituencies[$i]);
+          $ancestors = array_merge($ancestors, $cons_parents);
+        }
+      }
+    }
+    catch (Exception $e) {
+      // Object has no ancestors.
+    }
+  }
+  return $ancestors;
+}

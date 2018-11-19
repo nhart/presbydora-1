@@ -290,8 +290,10 @@ function presbydora_islandora_datastream_access($op, $islandora_datastream, $use
     $object = $islandora_datastream->parent;
     $pid = $object->id;
 
-    $ancestors = get_ancestors($pid);
+    module_load_include('inc', 'presbydora', 'includes/utilities');
+    $ancestors = presbydora_get_ancestors($pid);
     $bypass_pids = variable_get('presbydora_access_bypass_pids');
+
     $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
 
     if (!empty($bypass_pids) && $is_intersect) {
@@ -303,29 +305,4 @@ function presbydora_islandora_datastream_access($op, $islandora_datastream, $use
       return FALSE;
     }
   }
-}
-
-/**
- * Function that will return an array of ancestors related to the pid param.
- *
- * @param string $pid
- *   Object pid to find ancestors of.
- *
- * @return array
- *   Array containing ancestors' PIDs.
- */
-function get_ancestors($pid) {
-  $qp = new IslandoraSolrQueryProcessor();
-  $query = format_string('PID:"!pid"',
-    array('!pid' => $pid)
-  );
-  $qp->buildQuery($query);
-  $qp->executeQuery(FALSE);
-  $results = $qp->islandoraSolrResult['response'];
-
-  $ancestors = array();
-  if ($results['numFound'] > 0) {
-    $ancestors = $results['objects'][0]['solr_doc']['ancestors_ms'];
-  }
-  return $ancestors;
 }
