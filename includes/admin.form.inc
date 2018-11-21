@@ -17,14 +17,13 @@
  *   A renderable array available as a multi-select box.
  */
 function presbydora_admin_form(array $form, array &$form_state) {
+  $tableselect = presbydora_build_tableselect();
   $form['presbydora_access_bypass_pids'] = array(
-    '#type' => 'select',
+    '#type' => 'tableselect',
+    '#header' => $tableselect['header'],
+    '#options' => $tableselect['rows'],
     '#multiple' => TRUE,
-    '#title' => t('PIDs to allow bypass download access check'),
-    '#description' => t('List of collections that will bypass permission checks for datastream download.'),
-    '#default_value' => variable_get('presbydora_access_bypass_pids'),
-    '#size' => 10,
-    '#options' => get_available_collections(),
+    '#default_value' => variable_get('presbydora_access_bypass_pids', ''),
   );
 
   $form['presbydora_submit'] = array(
@@ -64,23 +63,42 @@ function presbydora_admin_form_submit(array $form, array $form_state) {
  * @return array
  *   An array of key value pairs where the key is the pid and value is label.
  */
-function get_available_collections() {
-  $tuque = islandora_get_tuque_connection();
+function presbydora_get_available_collections() {
+  $collections = islandora_basic_collection_get_collections();
   $options = array();
-  $query = <<<EOQ
-SELECT ?object ?label WHERE
-  {
-    ?object <fedora-model:hasModel> <info:fedora/islandora:collectionCModel>.
-    ?object <fedora-model:label> ?label .
-  }
-EOQ;
 
-  $results = $tuque->repository->ri->sparqlQuery($query);
-  foreach ($results as $result) {
-    $label = $result['label']['value'];
-    $value = $result['object']['value'];
-    $options[$value] = "$label: $value";
+  foreach ($collections as $collection) {
+    $label = $collection['label'];
+    $value = $collection['pid'];
+    $options[$value] = "$label";
   }
 
   return $options;
+}
+
+/**
+ * Helper function to build tableselect for presbydora admin menu.
+ *
+ * @return array
+ *   An array of key value pairs containing header and row values.
+ */
+function presbydora_build_tableselect() {
+  $collections = presbydora_get_available_collections();
+  $header = array(
+    'title' => t('Label'),
+    'type' => t('PID'),
+  );
+
+  $rows = array();
+  foreach ($collections as $pid => $label) {
+    $rows[$pid] = array(
+      'title' => $label,
+      'type' => $pid,
+    );
+  }
+  $tableselect = array();
+  $tableselect['header'] = $header;
+  $tableselect['rows'] = $rows;
+
+  return $tableselect;
 }

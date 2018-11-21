@@ -41,6 +41,8 @@ function presbydora_get_ancestors($pid) {
   );
   $qp->buildQuery($query);
   $qp->solrParams['fq'] = '';
+  $qp->solrParams['facet'] = 'false';
+  $qp->solrLimit = 1;
   $qp->executeQuery(FALSE);
   try {
     $results = $qp->islandoraSolrResult['response']['objects'];
@@ -58,13 +60,16 @@ function presbydora_get_ancestors($pid) {
       if (!empty($results[0]['solr_doc']['ancestors_ms'])) {
         $ancestors = $results[0]['solr_doc']['ancestors_ms'];
       }
-      // Extract constituencies and merge into one array.
+      // @note Extract constituencies and merge into one array. This is needed in
+      // the case of a compound object that belongs to an exempted collection.
+      // i.e. the compound children do not have an ancestors_ms field that will
+      // relate to the exempted collection.
       if (!empty($results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'])) {
         $constituencies = $results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'];
-        for ($i = 0; $i < count($constituencies); $i++) {
+        foreach ($constituencies as &$constituency) {
           // Remove info:fedora/.
-          $constituencies[$i] = substr($constituencies[$i], 12);
-          $cons_parents = presbydora_get_ancestors($constituencies[$i]);
+          $constituency = substr($constituency, 12);
+          $cons_parents = presbydora_get_ancestors($constituency);
           $ancestors = array_merge($ancestors, $cons_parents);
         }
       }
