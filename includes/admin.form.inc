@@ -28,7 +28,7 @@ function presbydora_admin_form(array $form, array &$form_state) {
 
   $form['presbydora_submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save Configurations'),
+    '#value' => t('Save Configuration'),
   );
 
   return $form;
@@ -49,7 +49,7 @@ function presbydora_admin_form_submit(array $form, array $form_state) {
   if (!empty($pids)) {
     foreach ($pids as $pid) {
       if (!islandora_is_valid_pid($pid)) {
-        drupal_set_message(t('@pid is not a valid pid!', array('@pid' => $pid)), 'error');
+        drupal_set_message(t('@pid is not a valid PID!', array('@pid' => $pid)), 'error');
       }
     }
   }
