@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Houses the install and uninstall hooks for WRLCdora.
+ * Houses the install and uninstall hooks for Presbydora.
  */
 
  /**
   * Implements hook_uninstall().
   */
-function wrlcdora_uninstall() {
+function presbydora_uninstall() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('presbydora', 'uninstall');
   $variables = array('presbydora_access_bypass_pids');
