@@ -286,18 +286,19 @@ function presbydora_embargo_date_set_year_range($form_element, $form_values) {
 function presbydora_islandora_datastream_access($op, $islandora_datastream, $user) {
   if ($islandora_datastream->id == 'OBJ' || $islandora_datastream->id == 'PDF') {
     // Modified to allow specific objects to be accessible.
-    $bypass_pids = array();
     $object = $islandora_datastream->parent;
     $pid = $object->id;
 
     module_load_include('inc', 'presbydora', 'includes/utilities');
-    $ancestors = presbydora_get_ancestors($pid);
-    $bypass_pids = variable_get('presbydora_access_bypass_pids', '');
+    $bypass_pids = variable_get('presbydora_access_bypass_pids', array());
+    if (!empty($bypass_pids)) {
+      $ancestors = presbydora_get_ancestors($pid);
+      $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
 
-    $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
-
-    if (!empty($bypass_pids) && $is_intersect) {
-      return TRUE;
+      if ($is_intersect) {
+        $access = (islandora_namespace_accessible($pid) && user_access($op, $user));
+        return $access;
+      }
     }
     $guest = user_role_load_by_name('PHS Guest');
     if ($user->uid == 0 || (isset($guest->rid) && user_has_role($guest->rid, $user))) {

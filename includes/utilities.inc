@@ -40,10 +40,19 @@ function presbydora_get_ancestors($pid) {
     array('!pid' => $pid)
   );
   $qp->buildQuery($query);
-  $qp->solrParams['fq'] = '';
+
+  $constituent_filter = array();
+  if (variable_get('islandora_compound_object_hide_child_objects_solr', TRUE)) {
+    $fq = variable_get('islandora_compound_object_solr_fq', '-RELS_EXT_isConstituentOf_uri_mt:[* TO *]');
+    if (!empty($fq)) {
+      $constituent_filter[] = $fq;
+    }
+  }
+  $qp->solrParams['fq'] = array_diff($qp->solrParams['fq'], $constituent_filter);
   $qp->solrParams['facet'] = 'false';
   $qp->solrLimit = 1;
   $qp->executeQuery(FALSE);
+
   try {
     $results = $qp->islandoraSolrResult['response']['objects'];
     $total_results = $qp->islandoraSolrResult['response']['numFound'];
@@ -65,10 +74,13 @@ function presbydora_get_ancestors($pid) {
     // relate to the exempted collection.
     if (isset($results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'])) {
       $constituencies = $results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'];
-      foreach ($constituencies as &$constituency) {
+      foreach ($constituencies as $constituency) {
         // Remove info:fedora/.
-        $constituency = substr($constituency, 12);
-        $cons_parents = presbydora_get_ancestors($constituency);
+        $constituency_pid = substr($constituency, 12);
+        // XXX: This can lead to a possible recursive loop. However, it has been
+        // decided that, because this is an edge case, we will handle this
+        // in the event it comes up. Blazegraph would help.
+        $cons_parents = presbydora_get_ancestors($constituency_pid);
         $ancestors = array_merge($ancestors, $cons_parents);
       }
     }
