@@ -311,7 +311,7 @@ function presbydora_islandora_datastream_access($op, $islandora_datastream, $use
  */
 function presbydora_islandora_collectioncmodel_islandora_object_purged($pid) {
   $bypass_pids = variable_get('presbydora_access_bypass_pids', array());
-  if (isset($bypass_pids)) {
+  if (isset($bypass_pids[$pid])) {
     unset($bypass_pids[$pid]);
     variable_set('presbydora_access_bypass_pids', $bypass_pids);
   }
