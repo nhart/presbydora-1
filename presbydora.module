@@ -296,13 +296,23 @@ function presbydora_islandora_datastream_access($op, $islandora_datastream, $use
       $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
 
       if ($is_intersect) {
-        $access = (islandora_namespace_accessible($pid) && user_access($op, $user));
-        return $access;
+        return NULL;
       }
     }
     $guest = user_role_load_by_name('PHS Guest');
     if ($user->uid == 0 || (isset($guest->rid) && user_has_role($guest->rid, $user))) {
       return FALSE;
     }
+  }
+}
+
+/**
+ * Implements hook_cmodel_pid_islandora_object_purged().
+ */
+function presbydora_islandora_collectioncmodel_islandora_object_purged($pid) {
+  $bypass_pids = variable_get('presbydora_access_bypass_pids', array());
+  if (!empty($bypass_pids)) {
+    unset($bypass_pids[$pid]);
+    variable_set('presbydora_access_bypass_pids', $bypass_pids);
   }
 }

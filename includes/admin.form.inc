@@ -18,15 +18,13 @@
  */
 function presbydora_admin_form(array $form, array &$form_state) {
   $tableselect = presbydora_build_tableselect();
-  $default_values = variable_get('presbydora_access_bypass_pids', array());
-  $default_values = array_filter($default_values);
 
   $form['presbydora_access_bypass_pids'] = array(
     '#type' => 'tableselect',
     '#header' => $tableselect['header'],
     '#options' => $tableselect['rows'],
     '#multiple' => TRUE,
-    '#default_value' => $default_values,
+    '#default_value' => variable_get('presbydora_access_bypass_pids', array()),
   );
 
   $form['presbydora_submit'] = array(
