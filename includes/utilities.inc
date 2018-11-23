@@ -24,3 +24,66 @@ function presbydora_text_view(AbstractObject $object) {
     ),
   );
 }
+
+/**
+ * Function that will return an array of ancestors related to the pid param.
+ *
+ * @param string $pid
+ *   Object pid to find ancestors of.
+ *
+ * @return array
+ *   Array containing ancestors' PIDs.
+ */
+function presbydora_get_ancestors($pid) {
+  $qp = new IslandoraSolrQueryProcessor();
+  $query = format_string('PID:"!pid"',
+    array('!pid' => $pid)
+  );
+  $qp->buildQuery($query);
+
+  $constituent_filter = array();
+  if (variable_get('islandora_compound_object_hide_child_objects_solr', TRUE)) {
+    $fq = variable_get('islandora_compound_object_solr_fq', '-RELS_EXT_isConstituentOf_uri_mt:[* TO *]');
+    if (!empty($fq)) {
+      $constituent_filter[] = $fq;
+    }
+  }
+  $qp->solrParams['fq'] = array_diff($qp->solrParams['fq'], $constituent_filter);
+  $qp->solrParams['facet'] = 'false';
+  $qp->solrLimit = 1;
+  $qp->executeQuery(FALSE);
+
+  try {
+    $results = $qp->islandoraSolrResult['response']['objects'];
+    $total_results = $qp->islandoraSolrResult['response']['numFound'];
+  }
+  catch (Exception $e) {
+    watchdog_exception('Presbydora', $e, 'Got an exception while searching for object ancestors and constituencies.', array(), WATCHDOG_ERROR);
+    $results = array();
+  }
+
+  $ancestors = array();
+  $constituencies = array();
+  if ($total_results > 0) {
+    if (isset($results[0]['solr_doc']['ancestors_ms'])) {
+      $ancestors = $results[0]['solr_doc']['ancestors_ms'];
+    }
+    // @note Extract constituencies and merge into one array. This is needed in
+    // the case of a compound object that belongs to an exempted collection.
+    // i.e. the compound children do not have an ancestors_ms field that will
+    // relate to the exempted collection.
+    if (isset($results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'])) {
+      $constituencies = $results[0]['solr_doc']['RELS_EXT_isConstituentOf_uri_ms'];
+      foreach ($constituencies as $constituency) {
+        // Remove info:fedora/.
+        $constituency_pid = substr($constituency, 12);
+        // XXX: This can lead to a possible recursive loop. However, it has been
+        // decided that, because this is an edge case, we will handle this
+        // in the event it comes up. Blazegraph would help.
+        $cons_parents = presbydora_get_ancestors($constituency_pid);
+        $ancestors = array_merge($ancestors, $cons_parents);
+      }
+    }
+  }
+  return $ancestors;
+}

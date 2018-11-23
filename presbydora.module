@@ -9,17 +9,29 @@
   * Implements hook_menu().
   */
 function presbydora_menu() {
-  return array(
-    'islandora/object/%islandora_object/view_text' => array(
-      'title' => 'Transcript',
-      'type' => MENU_LOCAL_TASK,
-      'page callback' => 'presbydora_text_view',
-      'page arguments' => array(2),
-      'access callback' => 'presbydora_access_text_view',
-      'access arguments' => array(2),
-      'file' => 'includes/utilities.inc',
-    ),
+  $items = array();
+
+  $items['admin/islandora/presbydora'] = array(
+    'title' => 'Presbydora Admin',
+    'description' => 'Configuration to specify objects that can bypass datastream access check.',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('presbydora_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
   );
+
+  $items['islandora/object/%islandora_object/view_text'] = array(
+    'title' => 'Transcript',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'presbydora_text_view',
+    'page arguments' => array(2),
+    'access callback' => 'presbydora_access_text_view',
+    'access arguments' => array(2),
+    'file' => 'includes/utilities.inc',
+  );
+
+  return $items;
 }
 
 /**
@@ -273,9 +285,34 @@ function presbydora_embargo_date_set_year_range($form_element, $form_values) {
  */
 function presbydora_islandora_datastream_access($op, $islandora_datastream, $user) {
   if ($islandora_datastream->id == 'OBJ' || $islandora_datastream->id == 'PDF') {
+    // Modified to allow specific objects to be accessible.
+    $object = $islandora_datastream->parent;
+    $pid = $object->id;
+
+    module_load_include('inc', 'presbydora', 'includes/utilities');
+    $bypass_pids = variable_get('presbydora_access_bypass_pids', array());
+    if (!empty($bypass_pids)) {
+      $ancestors = presbydora_get_ancestors($pid);
+      $is_intersect = !empty(array_intersect($ancestors, $bypass_pids));
+
+      if ($is_intersect) {
+        return NULL;
+      }
+    }
     $guest = user_role_load_by_name('PHS Guest');
     if ($user->uid == 0 || (isset($guest->rid) && user_has_role($guest->rid, $user))) {
       return FALSE;
     }
+  }
+}
+
+/**
+ * Implements hook_cmodel_pid_islandora_object_purged().
+ */
+function presbydora_islandora_collectioncmodel_islandora_object_purged($pid) {
+  $bypass_pids = variable_get('presbydora_access_bypass_pids', array());
+  if (isset($bypass_pids[$pid])) {
+    unset($bypass_pids[$pid]);
+    variable_set('presbydora_access_bypass_pids', $bypass_pids);
   }
 }
