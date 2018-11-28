@@ -18,8 +18,15 @@
  */
 function presbydora_admin_form(array $form, array &$form_state) {
   $tableselect = presbydora_build_tableselect();
+  $form['field'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Custom datastream access bypass'),
+    '#description' => t('Select collections to bypass custom datastream access.'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
 
-  $form['presbydora_access_bypass_pids'] = array(
+  $form['field']['presbydora_access_bypass_pids'] = array(
     '#type' => 'tableselect',
     '#header' => $tableselect['header'],
     '#options' => $tableselect['rows'],
@@ -27,7 +34,7 @@ function presbydora_admin_form(array $form, array &$form_state) {
     '#default_value' => variable_get('presbydora_access_bypass_pids', array()),
   );
 
-  $form['presbydora_submit'] = array(
+  $form['field']['presbydora_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Configuration'),
   );
