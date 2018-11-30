@@ -22,7 +22,6 @@ function presbydora_admin_form(array $form, array &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Custom datastream access bypass'),
     '#description' => t('Select collections to bypass custom datastream access.'),
-    '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
 
