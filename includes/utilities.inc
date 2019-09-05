@@ -108,9 +108,7 @@ function presbydora_user_pass_validate(&$form, &$form_state) {
   if (isset($account->uid)) {
     form_set_value(array('#parents' => array('account')), $account, $form_state);
   }
-  else {
-    $form['#submit'] = array('presbydora_user_pass_submit');
-  }
+  $form['#submit'] = array('presbydora_user_pass_submit');
 }
 
 /**
@@ -121,7 +119,17 @@ function presbydora_user_pass_validate(&$form, &$form_state) {
  * https://www.drupal.org/project/drupal/issues/1521996.
  */
 function presbydora_user_pass_submit($form, &$form_state) {
-  drupal_set_message(t('Further instructions have been sent to your e-mail address.'));
+  if (isset($form_state['values']['account']) && $form_state['values']['account']) {
+    global $language;
+    $account = $form_state['values']['account'];
+    // Mail one time login URL and instructions using current language.
+    $mail = _user_mail_notify('password_reset', $account, $language);
+    if (!empty($mail)) {
+      watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+    }
+  }
+  drupal_set_message(t('Further instructions have been sent to your e-mail address if such account exists.'));
+
   $form_state['redirect'] = 'user';
   return;
 }
