@@ -87,3 +87,41 @@ function presbydora_get_ancestors($pid) {
   }
   return $ancestors;
 }
+
+/**
+ * Custom validation for user password reset.
+ *
+ * This function is used to cover D7's security bug that reveals whether an
+ * email or username is in use, see:
+ * https://www.drupal.org/project/drupal/issues/1521996.
+ */
+function presbydora_user_pass_validate(&$form, &$form_state) {
+  $name = trim($form_state['values']['name']);
+  // Try to load by email.
+  $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
+  $account = reset($users);
+  if (!$account) {
+    // No success, try to load by name.
+    $users = user_load_multiple(array(), array('name' => $name, 'status' => '1'));
+    $account = reset($users);
+  }
+  if (isset($account->uid)) {
+    form_set_value(array('#parents' => array('account')), $account, $form_state);
+  }
+  else {
+    $form['#submit'] = array('presbydora_user_pass_submit');
+  }
+}
+
+/**
+ * Custom user password reset submit function.
+ *
+ * This function is used to cover D7's security bug that reveals whether an
+ * email or username is in use, see:
+ * https://www.drupal.org/project/drupal/issues/1521996.
+ */
+function presbydora_user_pass_submit($form, &$form_state) {
+  drupal_set_message(t('Further instructions have been sent to your e-mail address.'));
+  $form_state['redirect'] = 'user';
+  return;
+}

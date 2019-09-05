@@ -316,3 +316,11 @@ function presbydora_islandora_collectioncmodel_islandora_object_purged($pid) {
     variable_set('presbydora_access_bypass_pids', $bypass_pids);
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function presbydora_form_user_pass_alter(&$form, &$form_state, $form_id) {
+  module_load_include('inc', 'presbydora', 'includes/utilities');
+  $form['#validate'] = array('presbydora_user_pass_validate');
+}
