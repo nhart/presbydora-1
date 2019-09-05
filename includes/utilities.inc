@@ -133,4 +133,3 @@ function presbydora_user_pass_submit($form, &$form_state) {
   $form_state['redirect'] = 'user';
   return;
 }
-
