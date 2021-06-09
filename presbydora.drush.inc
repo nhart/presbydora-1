@@ -23,6 +23,11 @@ function presbydora_drush_command() {
         ),
       ),
     ),
+    'presbydora_generate_duplicate_datastream_curl_purge' => array(
+      'description' => dt('Return curl command to delete duplicate DS versions.'),
+      'options' => array(),
+      'aliases' => array('lwfp'),
+    ),
   );
 }
 
@@ -114,5 +119,36 @@ function presbydora_collection_reorganize_batch_operation($pid, $collections, &$
   else {
     drush_set_error("Could not load object: $pid");
     return FALSE;
+  }
+}
+
+/**
+ * Batch preprocessing drush script.
+ */
+function drush_presbydora_generate_duplicate_datastream_curl_purge() {
+  drupal_static_reset('islandora_get_tuque_connection');
+  $connection = islandora_get_tuque_connection();
+  $pids = array("");
+  $dsids = array("POLICY", "RELS-INT", "RELS-EXT");
+  foreach ($pids as $pid) {
+    $object = islandora_object_load($pid);
+    dd($pid, 'pid');
+    $track = array();
+    foreach ($dsids as $dsid) {
+      if (isset($object[$dsid])) {
+        dd($dsid, 'dsid');
+        foreach ($object[$dsid] as $ds) {
+          $date = $ds->createdDate->__toString();
+          dd($date, 'version');
+          if (!in_array($ds->content, $track)) {
+            $track[] = $ds->content;
+          }
+          else {
+            //$connection->repository->api->m->purgeDatastream($object->id, $dsid, array('startDT' => $date, 'endDT' => $date));
+            drush_log('curl -X DELETE -u fedoraAdmin:password "localhost:8080/fedora/objects/'. $object->id .'/datastreams/' . $dsid . '?startDT='. $date .'&endDT='. $date .'"');
+          }
+        }
+      }
+    }
   }
 }
