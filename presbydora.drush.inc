@@ -137,15 +137,31 @@ function drush_presbydora_generate_duplicate_datastream_curl_purge() {
     foreach ($dsids as $dsid) {
       if (isset($object[$dsid])) {
         dd($dsid, 'dsid');
-        foreach ($object[$dsid] as $ds) {
+
+        $version_array = array();
+        foreach ($object[$dsid] as $version => $ds) {
           $date = $ds->createdDate->__toString();
           dd($date, 'version');
-          if (!in_array($ds->content, $track)) {
-            $track[] = $ds->content;
+          if (in_array($ds->content, $track)) {
+            $version_array[$version] = $date;
           }
           else {
-            //$connection->repository->api->m->purgeDatastream($object->id, $dsid, array('startDT' => $date, 'endDT' => $date));
-            drush_log('curl -X DELETE -u fedoraAdmin:password "localhost:8080/fedora/objects/'. $object->id .'/datastreams/' . $dsid . '?startDT='. $date .'&endDT='. $date .'"');
+            $track[] = $ds->content;
+          }
+        }
+
+        $start_date = NULL;
+        foreach ($version_array as $version => $date) {
+          if ($start_date == NULL) {
+            $start_date = $date;
+          }
+          if(isset($version_array[$version + 1])) {
+            continue;
+          }
+          else {
+            $end_date = $date;
+            drush_log('curl -X DELETE -u fedoraAdmin:password "localhost:8080/fedora/objects/'. $object->id .'/datastreams/' . $dsid . '?startDT='. $end_date .'&endDT='. $start_date .'"');
+            $start_date = NULL;
           }
         }
       }
