@@ -133,35 +133,14 @@ function drush_presbydora_generate_duplicate_datastream_curl_purge() {
   foreach ($pids as $pid) {
     $object = islandora_object_load($pid);
     dd($pid, 'pid');
-    $track = array();
     foreach ($dsids as $dsid) {
       if (isset($object[$dsid])) {
         dd($dsid, 'dsid');
-
-        $version_array = array();
         foreach ($object[$dsid] as $version => $ds) {
-          $date = $ds->createdDate->__toString();
-          dd($date, 'version');
-          if (in_array($ds->content, $track)) {
-            $version_array[$version] = $date;
-          }
-          else {
-            $track[] = $ds->content;
-          }
-        }
-
-        $start_date = NULL;
-        foreach ($version_array as $version => $date) {
-          if ($start_date == NULL) {
-            $start_date = $date;
-          }
-          if(isset($version_array[$version + 1])) {
-            continue;
-          }
-          else {
-            $end_date = $date;
-            drush_log('curl -X DELETE -u fedoraAdmin:password "localhost:8080/fedora/objects/'. $object->id .'/datastreams/' . $dsid . '?startDT='. $end_date .'&endDT='. $start_date .'"');
-            $start_date = NULL;
+          if ($version > 9) {
+            $date = $ds->createdDate->__toString();
+            drush_log('curl -X DELETE -u fedoraAdmin:password "localhost:8080/fedora/objects/'. $object->id .'/datastreams/' . $dsid . '?endDT='. $date .'"');
+            break;
           }
         }
       }
